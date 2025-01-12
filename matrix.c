@@ -5,6 +5,7 @@
 
 
 typedef struct matrix_struct {
+  /**Zwei vorzeichenloser 2 Byte großer Datentyp. */
   unsigned short n;
   unsigned short m;
   double **data;
@@ -15,30 +16,41 @@ matrix createMatrix(unsigned short rows, unsigned short cols) {
   matrix m = (matrix) malloc(sizeof(matrix_struct));
   m->n = rows;
   m->m = cols;
+
   /** calloc gibt speicher Frei und initalisiert alle Elemente = 0*/
-  m->data = (double **) calloc(rows, sizeof(double *));
 
   /** Die For-Schleife benötigen wir jetzt, damit wir auch von jeder Zeile alle
  * Spalten auf 0 setzen können, deshalb benutzen wir hier auch wieder calloc, damit
    alle Elemente = 0 gesetzt werden können*/
-  for (i = 0; i < rows; i++) {
-    m->data[i] = (double *) calloc(cols, sizeof(double));
+  if (m->data == NULL) {
+    printf("ERROR: Speicher für 'data' konnte nicht reserviert werden!\n");
+    free(m);
+    exit(-1);
   }
 
-  /** Zusastzaufgabe Informatik, Idee For-For schleife also data[i][j] = (double **) calloc...*/
+  /** Hiermit definieren wir den Speicherbereich von m->data, dafür benutzen für einen double Pointer der für jede Zeile
+   * die sizeof double + die anzahl der Spalten * double abspeichert. */
+  m->data = (double **) calloc(rows, sizeof(double) + cols * sizeof(double));
+  if (m->data == NULL) {
+    printf("ERROR: Speicher für die Matrix-Daten konnte nicht reserviert werden!\n");
+    free(m->data);
+    free(m);
+    exit(-1);
+  }
+
+  /** Ein Pointer der auf den Bereich von m-> data schaut.*/
+  double *dataBlock = (double *)(m->data + rows);
+
+  // Zeiger für jede Zeile korrekt positionieren
+  for (i = 0; i < rows; i++) {
+    m->data[i] = dataBlock + i * cols;
+  }
+
   return m;
 }
 
-/** Wir deklarieren uns ein i für die For schleife, damit wir erstmal
- * den gesamten Speicher für die einzelnen Zeilen freigeben.
- * Zudem müssen wir danach den Speicher von data freigeben, wo drin die
- * einzelnen Zeilen schon freigegeben wurden
- * am Ende setzen wir den matrix Speicher frei.*/
+/** Speicher wieder freigeben für Zeiger auf Zeilen und Speicher für die Matrixstruktur freigeben. */
 void rmMatrix(matrix m) {
-   unsigned short i;
-   for(i = 0; i < m->n; i++) {
-     free(m->data[i]);
-   }
    free(m->data);
    free(m);
 }
@@ -102,8 +114,8 @@ void setEntry(matrix a, unsigned short r, unsigned short c, double v){
 matrix matrixDotMatrix(matrix a, matrix b){
   /** Deklaration der for-Schleifen Variablen */
   unsigned short i, j, k;
-  /** Prüfung ob der die Zeilen und Spalten größe gleich sind. */
-  if(rows(a) != cols(b)){
+  /** Prüfung ob die Spalten von Vektor 'a' und die Zeilen von Vektor 'b' gleich groß sind.*/
+  if(cols(a) != rows(b)){
     printf("ERROR: Die Zeilen und Spalten sind nicht gleich groß. \n");
     exit(-1);
   }
@@ -125,24 +137,21 @@ matrix matrixDotMatrix(matrix a, matrix b){
   return c;
 }
 
-/**
- * Calculate the matrix addition C = A + B. This method reports an
- * error if the matrix dimensions don't match and calls exit(-1).
- * @param a the A matrix reference
- * @param b the B matrix reference
- * @return the matrix C=A+B
- * @print error and exits if dimensions wrong
- */
+/**Hier werden zwei Matrizen miteinander addiert. */
 matrix matrixPlusMatrix(matrix a, matrix b){
   /** Deklaration der for-Schleifen Variablen */
   unsigned short i, j;
   if(rows(a) != rows(b) || cols(a) != cols(b)) {
-    printf("ERROR: Die Zeilen und Spalten sind nicht gleich groß. \n");
+    printf("ERROR: Die Zeilen und Spalten sind nicht gleich gross. \n");
   }
   /** Ergebnis Matrix erstellten 'c'. */
   matrix c = createMatrix(rows(a), cols(b));
 
-  // Hier fehlt noch erklärung.
+  /**In dieser For schleife passiert die eigentliche Matrizen-Addition.
+   * Hierbei nehmen wir zwei for-Schleifen, in der ersten for-Schleife gehen wir durch alle Zeilen durch
+   * die zweite for Schleife ist für die Anzahl der Spalten. Nun addieren wir einfach jeden einzelnen Wert
+   * der jeweiligen Zeilen, Spalten Kombination von Vektor 'a' und Vektor 'b'.
+   */
   for(i = 0; i < rows(a); i++) {
     for(j = 0; j < cols(a); j++) {
       c->data[i][j] = a->data[i][j] + b->data[i][j];
@@ -151,7 +160,25 @@ matrix matrixPlusMatrix(matrix a, matrix b){
   return c;
 }
 
-/** Hier muss noch Matrix*Vector hin programmiert werden. */
+
+/** Mit dieser Methode wird Matrix*Vektor gerechnet. */
+vector matrixDotVector(matrix a, vector x) {
+  unsigned short i, j;
+  double ergebnis = 0;
+  if (cols(a) != size(x)) {
+    printf("ERROR: Die Zeilen sind nicht gleich groß. \n");
+    exit(-1);
+  }
+  vector y = createVector(rows(a));
+  for (i = 0; i < rows(a); i++) {
+    for (j = 0; j < cols(a); j++) {
+      ergebnis += a->data[i][j] * getValue(x, j);
+    }
+    setValue(y, i, ergebnis);
+    ergebnis = 0;
+  }
+  return y;
+}
 
 
 
