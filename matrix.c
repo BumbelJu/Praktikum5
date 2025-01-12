@@ -13,45 +13,26 @@ typedef struct matrix_struct {
 
 matrix createMatrix(unsigned short rows, unsigned short cols) {
   unsigned short i;
-  matrix m = (matrix) malloc(sizeof(matrix_struct));
-  m->n = rows;
-  m->m = cols;
+  size_t total_size = sizeof(matrix_struct) + sizeof(double)* rows + sizeof(double)* rows * cols;
+  matrix_struct *matrix = (matrix_struct*) calloc(1, total_size);
 
-  /** calloc gibt speicher Frei und initalisiert alle Elemente = 0*/
+  matrix->n = rows;
+  matrix->m = cols;
 
-  /** Die For-Schleife benötigen wir jetzt, damit wir auch von jeder Zeile alle
- * Spalten auf 0 setzen können, deshalb benutzen wir hier auch wieder calloc, damit
-   alle Elemente = 0 gesetzt werden können*/
-  if (m->data == NULL) {
-    printf("ERROR: Speicher für 'data' konnte nicht reserviert werden!\n");
-    free(m);
-    exit(-1);
-  }
+  double **row_ptrs = (double **)(matrix + 1);
+  double *data_start = (double *)(row_ptrs + rows);
 
-  /** Hiermit definieren wir den Speicherbereich von m->data, dafür benutzen für einen double Pointer der für jede Zeile
-   * die sizeof double + die anzahl der Spalten * double abspeichert. */
-  m->data = (double **) calloc(rows, sizeof(double) + cols * sizeof(double));
-  if (m->data == NULL) {
-    printf("ERROR: Speicher für die Matrix-Daten konnte nicht reserviert werden!\n");
-    free(m->data);
-    free(m);
-    exit(-1);
-  }
-
-  /** Ein Pointer der auf den Bereich von m-> data schaut.*/
-  double *dataBlock = (double *)(m->data + rows);
-
-  // Zeiger für jede Zeile korrekt positionieren
   for (i = 0; i < rows; i++) {
-    m->data[i] = dataBlock + i * cols;
+    row_ptrs[i] = data_start + i * cols;
   }
 
-  return m;
+  matrix->data = row_ptrs;
+
+  return matrix;
 }
 
 /** Speicher wieder freigeben für Zeiger auf Zeilen und Speicher für die Matrixstruktur freigeben. */
 void rmMatrix(matrix m) {
-   free(m->data);
    free(m);
 }
 
