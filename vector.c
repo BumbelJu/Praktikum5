@@ -17,9 +17,13 @@ typedef struct vector_struct {
  * 4. Am Ende wird der erstellte Vektor zurückgegeben.
  */
 vector createVector(unsigned short n) {
-    vector v = malloc(sizeof(vector_struct));
-    v->n = n;
-    v->data = (double *) calloc(n, sizeof(double));
+    unsigned short i;
+    vector v = calloc(1, sizeof(vector_struct) + n * sizeof(double));
+    if (v) {
+        v->n = n;
+        v->data = (double *)(v + 1);
+    }
+
     return v;
 }
 
@@ -29,7 +33,6 @@ vector createVector(unsigned short n) {
  * Als Eingabeparameter geben wir unseren erstellten Vektor rein.
  */
 void rmVector(vector v) {
-    free(v->data);
     free(v);
 }
 
