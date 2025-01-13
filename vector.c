@@ -65,12 +65,7 @@ void setValue(vector v, unsigned short j, double value) {
     v->data[j] = value;
 }
 
-/** scalar product between to vectors.
- * @param a vector reference
- * @param a vector reference
- * @return scalar product a*b
- * @print error and exits if dimensions wrong
- */
+/** Hier wird Vektor * Vektor impliziert. */
 double vectorDotVector(vector a, vector b) {
     unsigned short i;
     double sum = 0;
@@ -84,12 +79,7 @@ double vectorDotVector(vector a, vector b) {
     return sum;
 }
 
-/** addition of two vectors.
- * @param a vector reference
- * @param a vector reference
- * @return c=a+b vector
- * @print error and exits if dimensions wrong
- */
+/** Hier wird Vektor + Vektor impliziert. */
 vector vectorPlusVector(vector a, vector b) {
     unsigned short i;
     /**Hier wird geprüft ob die Vektoren gleich groß sind.*/
