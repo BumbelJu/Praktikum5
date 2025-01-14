@@ -13,7 +13,7 @@ typedef struct matrix_struct {
 
 matrix createMatrix(unsigned short rows, unsigned short cols) {
   unsigned short i;
-  size_t total_size = sizeof(matrix_struct) + sizeof(double)* rows + sizeof(double)* rows * cols;
+  size_t total_size = sizeof(matrix_struct) + sizeof(double *) * rows + sizeof(double)* rows * cols;
   matrix_struct *matrix = (matrix_struct*) calloc(1, total_size);
 
   matrix->n = rows;
