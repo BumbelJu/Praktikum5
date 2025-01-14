@@ -19,6 +19,8 @@ matrix createMatrix(unsigned short rows, unsigned short cols) {
   matrix->n = rows;
   matrix->m = cols;
 
+  /** Wir rechnen Matrix + 1, da an der ersten Stelle des Pointers die Matrix_struct gespeicher ist und durch das +1 bekommen
+   * wir die einzelnen double Pointer für die Values.*/
   double **row_ptrs = (double **)(matrix + 1);
   double *data_start = (double *)(row_ptrs + rows);
 
